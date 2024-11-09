@@ -5,11 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3f69ecf9-3da9-488d-931d-1e0fb805376f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/av_general.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/df_notes.py" beforeDir="false" afterPath="$PROJECT_DIR$/df_notes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/final_av.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/final_av.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gaokao_data_process.py" beforeDir="false" afterPath="$PROJECT_DIR$/gaokao_data_process.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
