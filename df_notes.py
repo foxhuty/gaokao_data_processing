@@ -53,8 +53,7 @@ def get_average_school(self):
     final_av_percentage = subjects_average(data, subjects_av)
     print(final_av_percentage)
     print(final_av_percentage.columns)
+
+
 if __name__ == '__main__':
-
-
-
     get_average_school(data)

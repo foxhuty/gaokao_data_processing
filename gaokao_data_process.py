@@ -152,8 +152,8 @@ class GaokaoData2025:
         physics_min = data_mixed['物理'].min(skipna=True)
         data_history = data_mixed[data_mixed['历史'] >= history_min]
         # 删除多列
-        data_history=data_history.copy()
-        data_history.drop(['物理', '化学','化学等级', '化学赋分'], axis=1, inplace=True)
+        data_history = data_history.copy()
+        data_history.drop(['物理', '化学', '化学等级', '化学赋分'], axis=1, inplace=True)
 
         data_physics = data_mixed[data_mixed['物理'] >= physics_min]
         # 删除单列
@@ -171,9 +171,9 @@ class GaokaoData2025:
 
         return final_av
 
-    def subjects_average(self, data, subjects_av):
-        class_av = data.groupby('班级')[subjects_av].mean().round(2)
-        av_general = data[subjects_av].apply(np.mean, axis=0).round(2)
+    def subjects_average(self, data, subjects):
+        class_av = data.groupby('班级')[subjects].mean().round(2)
+        av_general = data[subjects].apply(np.mean, axis=0).round(2)
         # av_general = data[subjects_av].mean().round(2)
         av_percentage = class_av / av_general.round(2)
         # pandas 2.0以上用map替换applymap
@@ -192,10 +192,6 @@ class GaokaoData2025:
         return final_av_percentage
 
     def get_average_school(self, data):
-        # data = self.get_grade_data()[0]
-        # data.reset_index(inplace=True, drop=True)
-        # data = pd.read_excel(r'D:\data_test\高2026级学生10月考成绩汇总+++成绩分析统计结果')
-
         final_av = []
         subjects_av = [col for col in data.columns if
                        col in ['语文', '数学', '英语', '物理', '历史',
@@ -203,8 +199,7 @@ class GaokaoData2025:
                                '化学赋分', '政治赋分', '地理赋分', '生物赋分', '总分', '总分赋分']]
 
         final_av_percentage = self.subjects_average(data, subjects_av)
-        print(final_av_percentage)
-
+        # print(final_av_percentage)
         final_av.append(final_av_percentage)
         return final_av
 
@@ -246,9 +241,9 @@ class GaokaoData2025:
                 # combined_good_scores = self.get_average_school(scores_added_data[item])
                 good_score_data = self.good_scores_school(scores_added_data_list[item])
                 good_score_data.to_excel(writer, sheet_name=f'{self.sheet_names[item]}--有效分')
-                physics_data, history_data = self.separate_data(scores_added_data_list[item])
-                physics_data.to_excel(writer, sheet_name=f'{self.sheet_names[item]}-物理类')
-                history_data.to_excel(writer, sheet_name=f'{self.sheet_names[item]}-历史类')
+                # physics_data, history_data = self.separate_data(scores_added_data_list[item])
+                # physics_data.to_excel(writer, sheet_name=f'{self.sheet_names[item]}-物理类')
+                # history_data.to_excel(writer, sheet_name=f'{self.sheet_names[item]}-历史类')
 
     def get_final_scores(self, score, min_score, max_score):
         """
@@ -551,10 +546,32 @@ class GaokaoData2025:
 
         return inner
 
+    @time_use
+    def show_menu(self):
+        print(self.__str__())
+
+        while True:
+            flag = eval(input(f'按键功能选择:\n '
+                              f'    1:年级考试成绩分析；\n '
+                              f'    2:区级以上考试成绩分析；\n'
+                              f'     3:按其它数字键退出程序.\n请选择：'))
+            if flag == 1:
+                GaokaoData2025.total_line = int(input('请输入划线分数(高线或中线): '))
+                self.excel_school_files()
+                print('成绩分析已完成，谢谢使用！')
+                break
+            elif flag == 2:
+                self.excel_files()
+                print('成绩分析已完成，谢谢使用！')
+                break
+
+            else:
+                break
+
 
 if __name__ == '__main__':
-    file_path = r'D:\data_test\高2026级学生10月考成绩汇总.xlsx'
-    # file_path = r'D:\data_test\高2022级零诊成绩测试数据.xlsx'
+    # file_path = r'D:\data_test\高2026级学生10月考成绩汇总.xlsx'
+    file_path = r'D:\data_test\高2022级零诊成绩测试数据.xlsx'
 
     # 不分科的各科有效分
     GaokaoData2025.subjects_good_scores_all = {'语文': 85, '数学': 74, '英语': 68, '物理': 31, '历史': 46, '政治': 41,
@@ -565,13 +582,13 @@ if __name__ == '__main__':
     # 历史类各科有效分
     GaokaoData2025.subjects_good_scores_history = {'语文': 87, '数学': 45, '英语': 62, '历史': 46, '政治': 62,
                                                    '地理': 63, '化学': None, '生物': 52, '总分': 370}
-    # 划线分数（中线或高线）7E12-3BCC
+    # 划线分数（中线或高线）
     GaokaoData2025.total_line = 400
 
     newgaokao = GaokaoData2025(file_path)
 
-    # newgaokao.excel_files()
-    newgaokao.excel_school_files()
+    newgaokao.excel_files()
+    # newgaokao.excel_school_files()
     # newgaokao.get_mixed_data()
     # newgaokao.get_data_processed()
     # newgaokao.get_average_school()

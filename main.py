@@ -6,6 +6,8 @@
 # @Based on python 3.13
 from gaokao_data_process import GaokaoData2025
 import sys
+
+
 class MyException(object):
     def __init__(self, obj_data):
         self.obj_data = obj_data
@@ -20,12 +22,11 @@ class MyException(object):
         logging.error(traceback.format_exc())
         logging.info(msg=self.obj_data)
 
+
 def main(file):
     try:
         new_gaokao = GaokaoData2025(file)
-        # new_gaokao.excel_files()
-        new_gaokao.excel_school_files()
-        MyException(new_gaokao)
+        new_gaokao.show_menu()
 
     except Exception as e:
         print(f"An error occurred: {e}", file=sys.stderr)
@@ -49,8 +50,6 @@ if __name__ == '__main__':
     #
 
     # 划线分数（高线或中线）
-    GaokaoData2025.total_line = 370
+    # GaokaoData2025.total_line = 390
 
     main(file_path)
-
-
