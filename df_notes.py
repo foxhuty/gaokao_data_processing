@@ -48,8 +48,10 @@ def get_average_school(self):
     # print(subjects_av)
     class_av = data.groupby('班级')[subjects_av].mean().round(2)
     # print(class_av)
-    av_general = data[subjects_av].apply(np.nanmean, axis=1).round(2)
+    av_general = data[subjects_av].apply(np.mean, axis=0).round(2)
+
     print(av_general)
+    av_general.to_excel('av_general.xlsx')
     final_av_percentage = subjects_average(data, subjects_av)
     print(final_av_percentage)
     print(final_av_percentage.columns)
