@@ -565,7 +565,7 @@ if __name__ == '__main__':
     # 历史类各科有效分
     GaokaoData2025.subjects_good_scores_history = {'语文': 87, '数学': 45, '英语': 62, '历史': 46, '政治': 62,
                                                    '地理': 63, '化学': None, '生物': 52, '总分': 370}
-    # 划线分数（中线或高线）
+    # 划线分数（中线或高线）7E12-3BCC
     GaokaoData2025.total_line = 400
 
     newgaokao = GaokaoData2025(file_path)
