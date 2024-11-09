@@ -8,21 +8,6 @@ from gaokao_data_process import GaokaoData2025
 import sys
 
 
-class MyException(object):
-    def __init__(self, obj_data):
-        self.obj_data = obj_data
-        import traceback
-        import logging
-        logging.basicConfig(
-            level=logging.DEBUG,
-            filename='D:\\my_logging\\error.log',
-            format='%(asctime)s %(levelname)s\n %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
-        )
-        logging.error(traceback.format_exc())
-        logging.info(msg=self.obj_data)
-
-
 def main(file):
     try:
         new_gaokao = GaokaoData2025(file)
@@ -35,7 +20,6 @@ def main(file):
 if __name__ == '__main__':
     file_path = r'D:\data_test\高2026级学生10月考成绩汇总.xlsx'
     # file_path = r'D:\data_test\高2022级零诊成绩测试数据.xlsx'
-    # file_path = r'D:\data_test\高2022级零诊成绩测试数据11.xlsx'
     # file_path = r'D:\data_test\一诊考试成绩分析统计（中线）.xlsx'
 
     # 不分科的各科有效分
