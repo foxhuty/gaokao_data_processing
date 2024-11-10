@@ -85,10 +85,10 @@ class GaokaoData2025:
         return data_added
 
     def get_data_processed(self):
-        '''
-        此函数还没有完成。目前还不能调用
+        """
+         此函数还没有完成。目前还不能调用
         :return:
-        '''
+        """
         data = self.get_grade_data()
         data_processed_list = []
         if len(data) == 1:
@@ -134,10 +134,10 @@ class GaokaoData2025:
         return data
 
     def get_mixed_data(self):
-        '''
-        此函数暂时没有调用。用处待定
+        """
+          此函数暂时没有调用。用处待定
         :return:
-        '''
+        """
         df_list = []
         if '总表' in self.sheet_names:
             df_list.append(self.data_list[0])
@@ -155,11 +155,11 @@ class GaokaoData2025:
 
     @staticmethod
     def separate_data(data_mixed):
-        '''
-        用于分科后考试，赋分后再生成物理类和历史类两个df，用于生成excel文件
+        """
+         用于分科后考试，赋分后再生成物理类和历史类两个df，用于生成excel文件
         :param data_mixed:
-        :return:
-        '''
+        :return:物理类和历史类两个df
+        """
 
         history_min = data_mixed['历史'].min(skipna=True)
         physics_min = data_mixed['物理'].min(skipna=True)
@@ -174,10 +174,10 @@ class GaokaoData2025:
         return data_physics, data_history
 
     def get_average(self):
-        '''
+        """
         计算区级及以上考试的各学科平均分。不能用赋分后的df来计算
         :return: 返回一个有df(物理类，历史类)元素的列表
-        '''
+        """
         # data = self.data_list
         final_av = []
         for data in self.data_list:
@@ -189,12 +189,12 @@ class GaokaoData2025:
         return final_av
 
     def subjects_average(self, data, subjects):
-        '''
-        计算各学科的平均分。
+        """
+         计算各学科的平均分。
         :param data: df数据
         :param subjects: 参加计算平均分的学科
         :return: 返回一个df。包含有各班各科平均分，年级平均分和各科平均分在年级平均分中的占比，用于制作折线图
-        '''
+        """
         class_av = data.groupby('班级')[subjects].mean().round(2)
         # 求这个平均数，只能用apply(np.mean)才行。用其它的如mean(),apply(np.nanmean)都会报错
         av_general = data[subjects].apply(np.mean, axis=0).round(2)
@@ -215,11 +215,11 @@ class GaokaoData2025:
         return final_av_percentage
 
     def get_average_school(self, data):
-        '''
-        计算赋分后作有学科的平均分及平均分占比
+        """
+         计算赋分后作有学科的平均分及平均分占比
         :param data: df
         :return: 返回一个有df元素的列表。
-        '''
+        """
         final_av = []
         subjects_av = [col for col in data.columns if
                        col in ['语文', '数学', '英语', '物理', '历史',
@@ -231,10 +231,9 @@ class GaokaoData2025:
         return final_av
 
     def excel_files(self):
-        '''
-        区级及以上考试不用赋分,excel表上有物理类和历史类两个工作表（sheet)
-        :return:
-        '''
+        """
+         区级及以上考试不用赋分,excel表上有物理类和历史类两个工作表（sheet)
+        """
         # scores_added_data = self.get_grade_data()
         average_added = self.get_average()
         good_scores = self.good_scores()
@@ -251,10 +250,9 @@ class GaokaoData2025:
         print(f'对{self.__str__()}文件数据分析处理完成')
 
     def excel_school_files(self):
-        '''
-        学校组织的考试，要对化学政治地理和生物四科赋分。excel文件上要有一个总表工作表（sheet)
-        :return:
-        '''
+        """
+         学校组织的考试，要对化学政治地理和生物四科赋分。excel文件上要有一个总表工作表（sheet)
+        """
 
         scores_added_data_list = self.get_grade_data()
         with pd.ExcelWriter(self.file.split('.xlsx')[0] + '+++成绩分析统计结果.xlsx') as writer:
@@ -302,10 +300,10 @@ class GaokaoData2025:
             return score_added
 
     def good_scores(self):
-        '''
+        """
         用区级及以上考试的有效分统计，用所给的有效分数计算各班各科有效分上线情况
         :return: 返回一个含有效分统计的df元素列表
-        '''
+        """
 
         if '总表' in self.sheet_names:
             single_double_list = []
@@ -332,21 +330,21 @@ class GaokaoData2025:
             return single_double_list
 
     def good_scores_school(self, data):
-        '''
+        """
         用于学校考试的有效分统计，有效分数是由指定的划线分数计算得到
         :param data: df
         :return: 返回一个有效分统计的df
-        '''
+        """
         good_scores_data = self.get_single_double_school_data(data)
         return good_scores_data
 
     def get_single_double_data(self, data, **kwargs):
-        '''
-        按照已知有效分，计算各学科有效分上线数据。主要用于区级及以上考试的成绩数据分析
+        """
+         按照已知有效分，计算各学科有效分上线数据。主要用于区级及以上考试的成绩数据分析
         :param data:
         :param kwargs: 以字典形式输入各学科的有效分数
         :return: 单有效和双有效统计数据
-        '''
+        """
         subjects = [col for col in data.columns if
                     col in ['总分', '语文', '数学', '英语', '物理', '历史', '化学', '生物', '政治', '地理']]
         single_data_list = []
@@ -519,27 +517,27 @@ class GaokaoData2025:
 
     @staticmethod
     def get_single_subject_data(data, subject, subject_score):
-        '''
-        计算获取一个学科单有效的df
+        """
+         计算获取一个学科单有效的df
         :param data: df
         :param subject: 学科
         :param subject_score: 一个学科的有效分数
         :return: 返回一个单有效的series
-        '''
+        """
         single_subject = data[data[subject] >= subject_score].groupby(['班级'])[subject].count()
         return single_subject
 
     @staticmethod
     def get_double_subject_data(data, subject, total_col, subject_score, total):
-        '''
-        计算获取学科双有校的df
+        """
+         计算获取学科双有校的df
         :param data: df
         :param subject: 学科
         :param total_col: 总分字段名
         :param subject_score: 学科有效分数
         :param total: 总分
         :return: 返回一个学科双有效的series
-        '''
+        """
         double_subject_data = data[data[total_col] >= total]
         double_subject = double_subject_data[double_subject_data[subject] >= subject_score].groupby('班级')[
             subject].count()
@@ -567,12 +565,12 @@ class GaokaoData2025:
 
     @staticmethod
     def get_level(score, min_score):
-        '''
-        计算赋分学科的等级
+        """
+         计算赋分学科的等级
         :param score: 学科的卷面得分
         :param min_score: 所在等级的最低分
         :return: 相应的等级
-        '''
+        """
         if score >= min_score[0]:
             return 'A'
         elif score >= min_score[1]:
@@ -593,13 +591,13 @@ class GaokaoData2025:
 
     @staticmethod
     def get_subject_good_score(data, total_col, subject):
-        '''
-        计算学科有效分。按照总分上线率，计算学科有效分
+        """
+         计算学科有效分。按照总分上线率，计算学科有效分
         :param data: DataFrame
         :param subject: 学科
-        :param total: 总分（分为高线和中线）
+        :param total_col: 总分（分为高线和中线）
         :return: 学科的有效分（高线和低线）
-        '''
+        """
         total_num = data.shape[0]
         good_total_num = data.loc[data[total_col] >= GaokaoData2025.total_line].shape[0]
         good_percent_ratio = good_total_num / total_num
@@ -673,4 +671,3 @@ if __name__ == '__main__':
 
     # newgaokao.excel_files()
     newgaokao.excel_school_files()
-

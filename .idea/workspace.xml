@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3f69ecf9-3da9-488d-931d-1e0fb805376f" name="Changes" comment="">
+    <list default="true" id="3f69ecf9-3da9-488d-931d-1e0fb805376f" name="Changes" comment="minor changes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/df_notes.py" beforeDir="false" afterPath="$PROJECT_DIR$/df_notes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gaokao_data_process.py" beforeDir="false" afterPath="$PROJECT_DIR$/gaokao_data_process.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -151,6 +150,15 @@
       <workItem from="1731172582735" duration="2755000" />
       <workItem from="1731207105889" duration="5990000" />
     </task>
+    <task id="LOCAL-00001" summary="minor changes">
+      <option name="closed" value="true" />
+      <created>1731214302641</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1731214302641</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -158,10 +166,12 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="minor changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="minor changes" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/gaokao_data_processing$df_notes.coverage" NAME="df_notes Coverage Results" MODIFIED="1731158349123" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/gaokao_data_processing$gaokao_data_process.coverage" NAME="gaokao_data_process Coverage Results" MODIFIED="1731213771868" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/gaokao_data_processing$gaokao_data_process.coverage" NAME="gaokao_data_process Coverage Results" MODIFIED="1731213962742" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/gaokao_data_processing$main.coverage" NAME="main Coverage Results" MODIFIED="1731163409963" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
