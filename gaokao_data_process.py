@@ -673,7 +673,4 @@ if __name__ == '__main__':
 
     # newgaokao.excel_files()
     newgaokao.excel_school_files()
-    # newgaokao.get_mixed_data()
-    # newgaokao.get_data_processed()
-    # newgaokao.get_average_school()
-    # newgaokao.get_average()
+
