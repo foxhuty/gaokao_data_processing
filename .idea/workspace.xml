@@ -4,8 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3f69ecf9-3da9-488d-931d-1e0fb805376f" name="Changes" comment="错位人数已全部代码已补全">
-      <change afterPath="$PROJECT_DIR$/gaokao_logging.py" afterDir="false" />
+    <list default="true" id="3f69ecf9-3da9-488d-931d-1e0fb805376f" name="Changes" comment="logging added 2024-11-10">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gaokao_data_process.py" beforeDir="false" afterPath="$PROJECT_DIR$/gaokao_data_process.py" afterDir="false" />
     </list>
@@ -52,7 +51,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.gaokao_data_process">
     <configuration name="df_notes" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="gaokaoTools2025" />
       <option name="ENV_FILES" value="" />
@@ -124,8 +123,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.main" />
         <item itemvalue="Python.gaokao_data_process" />
+        <item itemvalue="Python.main" />
         <item itemvalue="Python.df_notes" />
       </list>
     </recent_temporary>
@@ -196,7 +195,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/gaokao_data_processing$df_notes.coverage" NAME="df_notes Coverage Results" MODIFIED="1731158349123" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/gaokao_data_processing$gaokao_data_process.coverage" NAME="gaokao_data_process Coverage Results" MODIFIED="1731213962742" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/gaokao_data_processing$main.coverage" NAME="main Coverage Results" MODIFIED="1731217885305" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/gaokao_data_processing$gaokao_data_process.coverage" NAME="gaokao_data_process Coverage Results" MODIFIED="1731225560062" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/gaokao_data_processing$main.coverage" NAME="main Coverage Results" MODIFIED="1731224975121" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

@@ -11,6 +11,7 @@ import numpy as np
 import os
 import time
 
+
 class GaokaoData2025:
     """
     从2025年起四川采用新高考（3+1+2)模式。这是专门针对新高考模式的政治, 地理, 生物, 化学四门赋分学科而设计的程序，
@@ -180,8 +181,9 @@ class GaokaoData2025:
         # data = self.data_list
         final_av = []
         for data in self.data_list:
-            subjects = [col for col in data.columns if
-                        col in ['语文', '数学', '英语', '物理', '历史', '政治', '地理', '生物', '化学', '总分']]
+            # subjects = [col for col in data.columns if
+            #             col in ['语文', '数学', '英语', '物理', '历史', '政治', '地理', '生物', '化学', '总分']]
+            subjects = self.get_subjects(data)
             final_av_percentage = self.subjects_average(data, subjects)
             final_av.append(final_av_percentage)
 
@@ -220,14 +222,19 @@ class GaokaoData2025:
         :return: 返回一个有df元素的列表。
         """
         final_av = []
-        subjects_av = [col for col in data.columns if
-                       col in ['语文', '数学', '英语', '物理', '历史',
-                               '化学', '政治', '地理', '生物',
-                               '化学赋分', '政治赋分', '地理赋分', '生物赋分', '总分', '总分赋分']]
+        subjects_av = self.get_subjects(data)
 
         final_av_percentage = self.subjects_average(data, subjects_av)
         final_av.append(final_av_percentage)
         return final_av
+
+    @staticmethod
+    def get_subjects(data):
+        subjects = [col for col in data.columns if
+                    col in ['语文', '数学', '英语', '物理', '历史',
+                            '化学', '政治', '地理', '生物',
+                            '化学赋分', '政治赋分', '地理赋分', '生物赋分', '总分', '总分赋分']]
+        return subjects
 
     def excel_files(self):
         """
@@ -345,8 +352,9 @@ class GaokaoData2025:
         :param kwargs: 以字典形式输入各学科的有效分数
         :return: 单有效和双有效统计数据
         """
-        subjects = [col for col in data.columns if
-                    col in ['总分', '语文', '数学', '英语', '物理', '历史', '化学', '生物', '政治', '地理']]
+        # subjects = [col for col in data.columns if
+        #             col in ['总分', '语文', '数学', '英语', '物理', '历史', '化学', '生物', '政治', '地理']]
+        subjects = self.get_subjects(data)
         single_data_list = []
         double_data_list = []
         # total = kwargs['总分']
@@ -381,16 +389,17 @@ class GaokaoData2025:
 
         """
 
-        subjects = [col for col in data.columns if
-                    col in ['语文', '数学', '英语', '物理', '历史', '化学', '政治', '地理', '生物',
-                            '化学赋分', '政治赋分', '地理赋分', '生物赋分', '总分', '总分赋分']]
+        # subjects = [col for col in data.columns if
+        #             col in ['语文', '数学', '英语', '物理', '历史', '化学', '政治', '地理', '生物',
+        #                     '化学赋分', '政治赋分', '地理赋分', '生物赋分', '总分', '总分赋分']]
+        subjects = self.get_subjects(data)
         single_data_list = []
         double_data_list = []
-        subjects_name = []
+        # subjects_name = []
         subjects_scores = []
         for subject in subjects:
             subject_good_score = self.get_subject_good_score(data, '总分赋分', subject)
-            subjects_name.append(subject)
+            # subjects_name.append(subject)
             subjects_scores.append(subject_good_score)
 
             single_data = self.get_single_subject_data(data, subject, subject_good_score)
@@ -400,7 +409,7 @@ class GaokaoData2025:
             single_data_list.append(single_data)
             double_data_list.append(double_data)
         # 获取有效分数并转换成df
-        good_scores_dict = dict(zip(subjects_name, subjects_scores))
+        good_scores_dict = dict(zip(subjects, subjects_scores))
         good_scores_df = pd.DataFrame(good_scores_dict, index=[0])
         # 合成单有效和双有效统计的df
         #
@@ -466,12 +475,13 @@ class GaokaoData2025:
         C_num = int(subject_num * 0.35)
         D_num = int(subject_num * 0.13)
         data.sort_values(by=subject, ascending=False, inplace=True, ignore_index=True)
-        # 计算A等级的卷面上下限分值及学生人数
+        # 计算A等级的卷面上下限分值及学生人数,由于每个等级的最低分会有不止一个，所以要再次切片
         data_subject_A = data.loc[:A_num - 1, subject]
         A_max = data_subject_A.max()
         A_min = data_subject_A.min()
         max_score.append(A_max)
         min_score.append(A_min)
+        # 再次切片，确保A等级所有最低分都在同一个等级
         final_data_subject_A = data[data[subject] >= A_min]
         # 计算B等级的卷面上下限分值及学生人数
         data_subject_B = data.loc[len(final_data_subject_A):(len(final_data_subject_A) + B_num - 1), subject]
@@ -479,6 +489,7 @@ class GaokaoData2025:
         B_min = data_subject_B.min()
         max_score.append(B_max)
         min_score.append(B_min)
+        # 再次切片，确保B等级所有最低分都在同一个等级
         final_data_subject_B = data[(data[subject] >= B_min) & (data[subject] <= B_max)]
         # 计算C等级的卷面上下限分值及学生人数
         data_subject_C = data.loc[(len(final_data_subject_A) + len(final_data_subject_B)):(
@@ -487,6 +498,7 @@ class GaokaoData2025:
         C_min = data_subject_C.min()
         max_score.append(C_max)
         min_score.append(C_min)
+        # 再次切片，确保C等级所有最低分都在同一个等级
         final_data_subject_C = data[(data[subject] >= C_min) & (data[subject] <= C_max)]
         # 计算D等级的卷面上下限分值及学生人数
         data_subject_D = data.loc[(len(final_data_subject_A) + len(final_data_subject_B) + len(final_data_subject_C)):(
@@ -495,6 +507,7 @@ class GaokaoData2025:
         d_min = data_subject_D.min()
         max_score.append(d_max)
         min_score.append(d_min)
+        # 再次切片，确保D等级所有最低分都在同一个等级
         final_data_subject_D = data[(data[subject] >= d_min) & (data[subject] <= d_max)]
         # 计算E等级的卷面上下限分值及学生人数
         final_data_subject_E = data.loc[
