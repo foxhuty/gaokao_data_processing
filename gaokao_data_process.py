@@ -307,25 +307,26 @@ class GaokaoData2025:
 
         if '总表' in self.sheet_names:
             single_double_list = []
-            single_df_all, double_df_all = self.get_single_double_data(self.data_list[0],
-                                                                       **GaokaoData2025.subjects_good_scores_all)
-            single_double = pd.concat([single_df_all, double_df_all], axis=0, keys=['单有效', '双有效'])
+            single_df_all, double_df_all, unmatched_df = self.get_single_double_data(self.data_list[0],
+                                                                                     **GaokaoData2025.subjects_good_scores_all)
+            single_double = pd.concat([single_df_all, double_df_all, unmatched_df], axis=0,
+                                      keys=['单有效', '双有效', '错位人数'])
             single_double_list.append(single_double)
             return single_double_list
         else:
             single_double_list = []
             data_physics = [data for data in self.data_list if '物理' in data.columns][0]
-            single_df_physics, double_df_physics = self.get_single_double_data(data_physics,
-                                                                               **GaokaoData2025.subjects_good_scores_physics)
-            single_double_physics = pd.concat([single_df_physics, double_df_physics], axis=0,
-                                              keys=['单有效', '双有效'])
+            single_df_physics, double_df_physics, unmatched_df = self.get_single_double_data(data_physics,
+                                                                                             **GaokaoData2025.subjects_good_scores_physics)
+            single_double_physics = pd.concat([single_df_physics, double_df_physics, unmatched_df], axis=0,
+                                              keys=['单有效', '双有效', '错位人数'])
             single_double_list.append(single_double_physics)
             data_history = [data for data in self.data_list if '历史' in data.columns][0]
-            single_df_history, double_df_history = self.get_single_double_data(data_history,
-                                                                               **GaokaoData2025.subjects_good_scores_history)
+            single_df_history, double_df_history, unmatched_df = self.get_single_double_data(data_history,
+                                                                                             **GaokaoData2025.subjects_good_scores_history)
             # single_df_history.sort_index(ascending=True, inplace=True)
-            single_double_history = pd.concat([single_df_history, double_df_history], axis=0,
-                                              keys=['单有效', '双有效'])
+            single_double_history = pd.concat([single_df_history, double_df_history, unmatched_df], axis=0,
+                                              keys=['单有效', '双有效', '错位人数'])
             single_double_list.append(single_double_history)
             return single_double_list
 
@@ -357,6 +358,7 @@ class GaokaoData2025:
             double_data_list.append(double_data)
         single_data = pd.concat(single_data_list, axis=1)
         double_data = pd.concat(double_data_list, axis=1)
+        unmatched_data = self.get_unmatched_data(double_data, '总分')
         # 单有效统计：增加一列参考人数和一行年级共计
         single_data['参考人数'] = data['班级'].value_counts()
         single_data.loc['年级共计'] = [single_data[col].sum() for col in single_data.columns]
@@ -370,7 +372,7 @@ class GaokaoData2025:
         double_data.loc['年级共计'] = [double_data[col].sum() for col in double_data.columns]
         double_data = self.change_columns_order(double_data)
 
-        return single_data, double_data
+        return single_data, double_data, unmatched_data
 
     def get_single_double_school_data(self, data):
         """
