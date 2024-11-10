@@ -14,6 +14,8 @@ subjects = [col for col in data.columns if
             col in ['语文', '数学', '英语', '物理', '历史',
                     '化学', '政治', '地理', '生物',
                     '化学赋分', '政治赋分', '地理赋分', '生物赋分', '总分', '总分赋分']]
+
+
 class MyException:
     def __init__(self, obj_data):
         self.obj_data = obj_data
@@ -27,6 +29,7 @@ class MyException:
         )
         logging.error(traceback.format_exc())
         logging.info(msg=self.obj_data)
+
 
 def subjects_average(data, subjects_av):
     class_av = data.groupby('班级')[subjects_av].mean().round(2)

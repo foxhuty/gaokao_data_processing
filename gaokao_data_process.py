@@ -375,11 +375,13 @@ class GaokaoData2025:
         return single_data, double_data
 
     def get_single_double_school_data(self, data):
-        '''
-        按照新高考的模式，计算中线和高线的有效分，完成单有效和双有效的统计
+        """
+         按照新高考的模式，计算中线和高线的有效分，完成单有效和双有效的统计
         :param data:
         :return: 返回含有有效分数，单有效和双有效的df
-        '''
+
+        """
+
         subjects = [col for col in data.columns if
                     col in ['语文', '数学', '英语', '物理', '历史', '化学', '政治', '地理', '生物',
                             '化学赋分', '政治赋分', '地理赋分', '生物赋分', '总分', '总分赋分']]
@@ -402,8 +404,13 @@ class GaokaoData2025:
         good_scores_dict = dict(zip(subjects_name, subjects_scores))
         good_scores_df = pd.DataFrame(good_scores_dict, index=[0])
         # 合成单有效和双有效统计的df
+        #
         single_data = pd.concat(single_data_list, axis=1)
         double_data = pd.concat(double_data_list, axis=1)
+
+        # 计算错位人数
+        unmatched_df = self.get_unmatched_data(double_data, '总分赋分')
+
         # 单有效统计：增加一列参考人数和一行年级共计
         single_data['参考人数'] = data['班级'].value_counts()
         single_data.loc['年级共计'] = [single_data[col].sum() for col in single_data.columns]
@@ -416,12 +423,33 @@ class GaokaoData2025:
         double_data['参考人数'] = data['班级'].value_counts()
         double_data.loc['年级共计'] = [double_data[col].sum() for col in double_data.columns]
 
-        combined_data = pd.concat([good_scores_df, single_data, double_data], keys=['有效分数', '单有效', '双有效'],
+        combined_data = pd.concat([good_scores_df, single_data, double_data, unmatched_df],
+                                  keys=['有效分数', '单有效', '双有效', '错位人数'],
                                   axis=0)
         # 改变列顺序，把参考人数一列放在班级后面
         combined_data = self.change_columns_order(combined_data)
 
         return combined_data
+
+    @staticmethod
+    def get_unmatched_data(data, total_col):
+        """
+        计算错位人数
+        :param total_col: 总分或总分赋分
+        :param data: 双有效数据
+        :return: 返回一个错位人数的df
+
+        """
+        unmatched_list = []
+        for subject in data.columns:
+            unmatched_subject = data[total_col] - data[subject]
+            unmatched_list.append(unmatched_subject)
+
+        unmatched_df_dict = dict(zip(data.columns, unmatched_list))
+        unmatched_df = pd.DataFrame(unmatched_df_dict, index=data.index)
+        unmatched_df.loc['年级共计'] = [unmatched_df[col].sum() for col in unmatched_df.columns]
+        del unmatched_df[total_col]
+        return unmatched_df
 
     @staticmethod
     def get_subject_max_min_score(data, subject):
