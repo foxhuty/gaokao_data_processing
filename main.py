@@ -5,6 +5,7 @@
 # @Software: PyCharm
 # @Based on python 3.13
 from gaokao_data_process import GaokaoData2025
+from gaokao_logging import MyException
 import sys
 
 
@@ -12,6 +13,8 @@ def main(file):
     try:
         new_gaokao = GaokaoData2025(file)
         new_gaokao.show_menu()
+        MyException(new_gaokao)
+
 
     except Exception as e:
         print(f"An error occurred: {e}", file=sys.stderr)

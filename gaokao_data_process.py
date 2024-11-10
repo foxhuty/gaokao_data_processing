@@ -11,7 +11,6 @@ import numpy as np
 import os
 import time
 
-
 class GaokaoData2025:
     """
     从2025年起四川采用新高考（3+1+2)模式。这是专门针对新高考模式的政治, 地理, 生物, 化学四门赋分学科而设计的程序，
