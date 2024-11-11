@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3f69ecf9-3da9-488d-931d-1e0fb805376f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="3f69ecf9-3da9-488d-931d-1e0fb805376f" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -40,7 +38,7 @@
     "Python.gaokao_data_process.executor": "Run",
     "Python.main.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "D:/PycharmProjects/gaokao2025_processing",
+    "last_opened_file_path": "D:/PycharmProjects/gaokao_for_2025/gaokao2025_processing",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -153,6 +151,7 @@
       <workItem from="1731034492809" duration="3040000" />
       <workItem from="1731037708034" duration="4797000" />
       <workItem from="1731285252754" duration="59000" />
+      <workItem from="1731288417723" duration="522000" />
     </task>
     <servers />
   </component>
