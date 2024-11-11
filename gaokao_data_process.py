@@ -20,16 +20,16 @@ class GaokaoData2025:
     程序可以读取Excel文件中的成绩数据，计算各学科的赋分等级和赋分值，统计班级平均分，各科有效分并生成包含这些分析结果的Excel文件。
     """
     # 各个等级赋分区间（T1——T2）
-    A_T_range = [86, 100]
-    B_T_range = [71, 85]
-    C_T_range = [56, 70]
-    D_T_range = [41, 55]
-    E_T_range = [30, 40]
-    # A_T_range = [76, 90]
-    # B_T_range = [61, 75]
-    # C_T_range = [46, 60]
-    # D_T_range = [31, 45]
-    # E_T_range = [20, 30]
+    # A_T_range = [86, 100]
+    # B_T_range = [71, 85]
+    # C_T_range = [56, 70]
+    # D_T_range = [41, 55]
+    # E_T_range = [30, 40]
+    A_T_range = [76, 90]
+    B_T_range = [61, 75]
+    C_T_range = [46, 60]
+    D_T_range = [31, 45]
+    E_T_range = [20, 30]
 
     subjects_good_scores_all = {'语文': None, '数学': None, '英语': None, '物理': None, '历史': None, '政治': None,
                                 '地理': None, '化学': None, '生物': None, '总分': None}
@@ -169,6 +169,8 @@ class GaokaoData2025:
         data_history.drop(['物理', '化学', '化学等级', '化学赋分'], axis=1, inplace=True)
 
         data_physics = data_mixed[data_mixed['物理'] >= physics_min]
+        data_physics = data_physics.copy()
+
         # 删除单列
         del data_physics['历史']
         return data_physics, data_history
@@ -266,15 +268,24 @@ class GaokaoData2025:
                 scores_added_data_list[item].to_excel(writer, sheet_name=f'{self.sheet_names[item]}-赋分表',
                                                       index=False,
                                                       float_format='%.2f')
+                physics_data, history_data = self.separate_data(scores_added_data_list[item])
 
-                average_added = self.get_average_school(scores_added_data_list[item])
-                average_added[item].to_excel(writer, sheet_name=f'{self.sheet_names[item]}-平均分统计')
+                # average_added = self.get_average_school(scores_added_data_list[item])
+                # average_added[item].to_excel(writer, sheet_name=f'{self.sheet_names[item]}-平均分统计')
+                average_data_physics = self.get_average_school(physics_data)
+                average_data_history = self.get_average_school(history_data)
+                average_data_physics[item].to_excel(writer, sheet_name='物理类平均分')
+                average_data_history[item].to_excel(writer, sheet_name='历史类平均分')
 
-                good_score_data = self.good_scores_school(scores_added_data_list[item])
-                good_score_data.to_excel(writer, sheet_name=f'{self.sheet_names[item]}--有效分')
+                # good_score_data = self.good_scores_school(scores_added_data_list[item])
+                # good_score_data.to_excel(writer, sheet_name=f'{self.sheet_names[item]}--有效分')
+                good_scores_data_physics = self.good_scores_school(physics_data)
+                good_scores_data_history = self.good_scores_school(history_data)
+                good_scores_data_history.to_excel(writer, sheet_name='历史类有效分')
+                good_scores_data_physics.to_excel(writer, sheet_name='物理类有效分')
                 # physics_data, history_data = self.separate_data(scores_added_data_list[item])
-                # physics_data.to_excel(writer, sheet_name=f'{self.sheet_names[item]}-物理类')
-                # history_data.to_excel(writer, sheet_name=f'{self.sheet_names[item]}-历史类')
+                physics_data.to_excel(writer, sheet_name=f'{self.sheet_names[item]}-物理类')
+                history_data.to_excel(writer, sheet_name=f'{self.sheet_names[item]}-历史类')
 
     def get_final_scores(self, score, min_score, max_score):
         """
