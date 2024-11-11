@@ -11,6 +11,7 @@ import numpy as np
 import os
 import time
 
+
 class GaokaoData2025:
     """
     从2025年起四川采用新高考（3+1+2)模式。这是专门针对新高考模式的政治, 地理, 生物, 化学四门赋分学科而设计的程序，
@@ -36,8 +37,7 @@ class GaokaoData2025:
                                     '生物': None, '政治': None, '地理': None, '总分': None}
     subjects_good_scores_history = {'语文': None, '数学': None, '英语': None, '历史': None, '生物': None,
                                     '政治': None, '地理': None, '总分': None}
-    high_line = None
-    mid_line = None
+    total_line = None
 
     def __init__(self, file):
         if not os.path.isfile(file) or not file.endswith('.xlsx'):
@@ -85,6 +85,10 @@ class GaokaoData2025:
         return data_added
 
     def get_data_processed(self):
+        """
+         此函数还没有完成。目前还不能调用
+        :return:
+        """
         data = self.get_grade_data()
         data_processed_list = []
         if len(data) == 1:
@@ -130,9 +134,13 @@ class GaokaoData2025:
         return data
 
     def get_mixed_data(self):
-        data_list = []
+        """
+          此函数暂时没有调用。用处待定
+        :return:
+        """
+        df_list = []
         if '总表' in self.sheet_names:
-            data_list.append(self.data_list[0])
+            df_list.append(self.data_list[0])
             return self.data_list[0]
         else:
             data_physics = [data for data in self.data_list if '物理' in data.columns][0]
@@ -142,61 +150,100 @@ class GaokaoData2025:
             df_mixed.sort_values(by='总分', ascending=False, inplace=True)
             df_mixed['序号'] = [i + 1 for i in range(len(df_mixed))]
             # df_mixed.to_excel(r'D:\data_test\mixed_df.xlsx', sheet_name='总表', index=False)
-            # data_list.append(df_mixed)
-            return df_mixed
+            df_list.append(df_mixed)
+            return df_list
 
-    def separate_data(self):
-        data_mixed = self.get_mixed_data()
+    @staticmethod
+    def separate_data(data_mixed):
+        """
+         用于分科后考试，赋分后再生成物理类和历史类两个df，用于生成excel文件
+        :param data_mixed:
+        :return:物理类和历史类两个df
+        """
+
         history_min = data_mixed['历史'].min(skipna=True)
         physics_min = data_mixed['物理'].min(skipna=True)
         data_history = data_mixed[data_mixed['历史'] >= history_min]
         # 删除多列
-        data_history.drop(['物理', '化学'], axis=1, inplace=True)
+        data_history = data_history.copy()
+        data_history.drop(['物理', '化学', '化学等级', '化学赋分'], axis=1, inplace=True)
 
         data_physics = data_mixed[data_mixed['物理'] >= physics_min]
         # 删除单列
         del data_physics['历史']
-        return data_history, data_physics
+        return data_physics, data_history
 
     def get_average(self):
+        """
+        计算区级及以上考试的各学科平均分。不能用赋分后的df来计算
+        :return: 返回一个有df(物理类，历史类)元素的列表
+        """
         # data = self.data_list
         final_av = []
-        for item in range(len(self.data_list)):
-            subjects_av = [col for col in self.data_list[item].columns if
-                           col in ['语文', '数学', '英语', '物理', '历史', '政治', '地理', '生物', '化学', '总分']]
-            class_av = self.data_list[item].groupby('班级')[subjects_av].mean().round(2)
-            av_general = self.data_list[item][subjects_av].apply(np.nanmean, axis=0).round(2)
-            # av_general = data[subjects_av].mean().round(2)
-
-            av_percentage = class_av / av_general.round(2)
-            # pandas 2.0以上用map替换applymap
-            av_percentage = av_percentage.map(lambda x: format(x, '.2%'))  # 以百分号显示
-            av_percentage = av_percentage.map(lambda x: x.replace('nan%', ''))  # 不显示nan%
-            # print(av_percentage.columns)
-            av_percentage_cols = [col + '占比' for col in av_percentage.columns]
-            col_dict = dict(zip(av_percentage.columns, av_percentage_cols))
-            av_percentage.rename(columns=col_dict, inplace=True)
-            # print(av_percentage.columns)
-
-            class_av.loc['年级平均'] = av_general
-            class_av['参考人数'] = self.data_list[item]['班级'].value_counts()
-            class_av.loc['年级平均', '参考人数'] = class_av['参考人数'].sum()
-
-            final_av_percentage = pd.concat([class_av, av_percentage], axis=1)
-            final_av_percentage = self.change_columns_order(final_av_percentage)
+        for data in self.data_list:
+            # subjects = [col for col in data.columns if
+            #             col in ['语文', '数学', '英语', '物理', '历史', '政治', '地理', '生物', '化学', '总分']]
+            subjects = self.get_subjects(data)
+            final_av_percentage = self.subjects_average(data, subjects)
             final_av.append(final_av_percentage)
 
         return final_av
 
+    def subjects_average(self, data, subjects):
+        """
+         计算各学科的平均分。
+        :param data: df数据
+        :param subjects: 参加计算平均分的学科
+        :return: 返回一个df。包含有各班各科平均分，年级平均分和各科平均分在年级平均分中的占比，用于制作折线图
+        """
+        class_av = data.groupby('班级')[subjects].mean().round(2)
+        # 求这个平均数，只能用apply(np.mean)才行。用其它的如mean(),apply(np.nanmean)都会报错
+        av_general = data[subjects].apply(np.mean, axis=0).round(2)
+        av_percentage = class_av / av_general.round(2)
+        # pandas 2.0以上用map替换applymap
+        av_percentage = av_percentage.map(lambda x: format(x, '.2%'))  # 以百分号显示
+        av_percentage = av_percentage.map(lambda x: x.replace('nan%', ''))  # 不显示nan%
+        # print(av_percentage.columns)
+        av_percentage_cols = [col + '占比' for col in av_percentage.columns]
+        col_dict = dict(zip(av_percentage.columns, av_percentage_cols))
+        av_percentage.rename(columns=col_dict, inplace=True)
+        # print(av_percentage.columns)
+        class_av.loc['年级平均'] = av_general
+        class_av['参考人数'] = data['班级'].value_counts()
+        class_av.loc['年级平均', '参考人数'] = class_av['参考人数'].sum()
+        final_av_percentage = pd.concat([class_av, av_percentage], axis=1)
+        final_av_percentage = self.change_columns_order(final_av_percentage)
+        return final_av_percentage
+
+    def get_average_school(self, data):
+        """
+         计算赋分后作有学科的平均分及平均分占比
+        :param data: df
+        :return: 返回一个有df元素的列表。
+        """
+        final_av = []
+        subjects_av = self.get_subjects(data)
+
+        final_av_percentage = self.subjects_average(data, subjects_av)
+        final_av.append(final_av_percentage)
+        return final_av
+
+    @staticmethod
+    def get_subjects(data):
+        subjects = [col for col in data.columns if
+                    col in ['语文', '数学', '英语', '物理', '历史',
+                            '化学', '政治', '地理', '生物',
+                            '化学赋分', '政治赋分', '地理赋分', '生物赋分', '总分', '总分赋分']]
+        return subjects
+
     def excel_files(self):
-        '''
-        区级及以上考试不用赋分
-        :return:
-        '''
+        """
+         区级及以上考试不用赋分,excel表上有物理类和历史类两个工作表（sheet)
+        """
         # scores_added_data = self.get_grade_data()
         average_added = self.get_average()
         good_scores = self.good_scores()
-        with pd.ExcelWriter(self.file.split('.xlsx')[0] + '--成绩分析统计结果.xlsx') as writer:
+        with pd.ExcelWriter(self.file.split('.xlsx')[0] + '---成绩分析统计结果.xlsx') as writer:
             for item in range(len(average_added)):
                 # scores_added_data[item].to_excel(writer, sheet_name=f'{self.sheet_names[item]}-赋分表', index=False,
                 #                                  float_format='%.2f')
@@ -209,21 +256,25 @@ class GaokaoData2025:
         print(f'对{self.__str__()}文件数据分析处理完成')
 
     def excel_school_files(self):
-        scores_added_data = self.get_grade_data()
-        average_added = self.get_average()
+        """
+         学校组织的考试，要对化学政治地理和生物四科赋分。excel文件上要有一个总表工作表（sheet)
+        """
 
+        scores_added_data_list = self.get_grade_data()
         with pd.ExcelWriter(self.file.split('.xlsx')[0] + '+++成绩分析统计结果.xlsx') as writer:
-            for item in range(len(scores_added_data)):
-                scores_added_data[item].to_excel(writer, sheet_name=f'{self.sheet_names[item]}-赋分表', index=False,
-                                                 float_format='%.2f')
+            for item in range(len(scores_added_data_list)):
+                scores_added_data_list[item].to_excel(writer, sheet_name=f'{self.sheet_names[item]}-赋分表',
+                                                      index=False,
+                                                      float_format='%.2f')
+
+                average_added = self.get_average_school(scores_added_data_list[item])
                 average_added[item].to_excel(writer, sheet_name=f'{self.sheet_names[item]}-平均分统计')
-            if len(self.sheet_names) == 1:
-                good_score_data = self.good_scores_school()
+
+                good_score_data = self.good_scores_school(scores_added_data_list[item])
                 good_score_data.to_excel(writer, sheet_name=f'{self.sheet_names[item]}--有效分')
-            else:
-                good_scores_physics, good_scores_history = self.good_scores_school()
-                good_scores_physics.to_excel(writer, sheet_name='物理类有效分统计')
-                good_scores_history.to_excel(writer, sheet_name='历史类有效分统计')
+                # physics_data, history_data = self.separate_data(scores_added_data_list[item])
+                # physics_data.to_excel(writer, sheet_name=f'{self.sheet_names[item]}-物理类')
+                # history_data.to_excel(writer, sheet_name=f'{self.sheet_names[item]}-历史类')
 
     def get_final_scores(self, score, min_score, max_score):
         """
@@ -255,74 +306,66 @@ class GaokaoData2025:
             return score_added
 
     def good_scores(self):
-        # data_list = self.data_list
-        # sheet_names = self.sheet_names
+        """
+        用区级及以上考试的有效分统计，用所给的有效分数计算各班各科有效分上线情况
+        :return: 返回一个含有效分统计的df元素列表
+        """
 
         if '总表' in self.sheet_names:
             single_double_list = []
-            single_df_all, double_df_all = self.get_single_double_data(self.data_list[0],
-                                                                       **GaokaoData2025.subjects_good_scores_all)
-            single_double = pd.concat([single_df_all, double_df_all], axis=0, keys=['单有效', '双有效'])
+            single_df_all, double_df_all, unmatched_df = self.get_single_double_data(self.data_list[0],
+                                                                                     **GaokaoData2025.subjects_good_scores_all)
+            single_double = pd.concat([single_df_all, double_df_all, unmatched_df], axis=0,
+                                      keys=['单有效', '双有效', '错位人数'])
             single_double_list.append(single_double)
             return single_double_list
         else:
             single_double_list = []
             data_physics = [data for data in self.data_list if '物理' in data.columns][0]
-            single_df_physics, double_df_physics = self.get_single_double_data(data_physics,
-                                                                               **GaokaoData2025.subjects_good_scores_physics)
-            single_double_physics = pd.concat([single_df_physics, double_df_physics], axis=0,
-                                              keys=['单有效', '双有效'])
+            single_df_physics, double_df_physics, unmatched_df = self.get_single_double_data(data_physics,
+                                                                                             **GaokaoData2025.subjects_good_scores_physics)
+            single_double_physics = pd.concat([single_df_physics, double_df_physics, unmatched_df], axis=0,
+                                              keys=['单有效', '双有效', '错位人数'])
             single_double_list.append(single_double_physics)
             data_history = [data for data in self.data_list if '历史' in data.columns][0]
-            single_df_history, double_df_history = self.get_single_double_data(data_history,
-                                                                               **GaokaoData2025.subjects_good_scores_history)
+            single_df_history, double_df_history, unmatched_df = self.get_single_double_data(data_history,
+                                                                                             **GaokaoData2025.subjects_good_scores_history)
             # single_df_history.sort_index(ascending=True, inplace=True)
-            single_double_history = pd.concat([single_df_history, double_df_history], axis=0,
-                                              keys=['单有效', '双有效'])
+            single_double_history = pd.concat([single_df_history, double_df_history, unmatched_df], axis=0,
+                                              keys=['单有效', '双有效', '错位人数'])
             single_double_list.append(single_double_history)
             return single_double_list
 
-    def good_scores_school(self):
-        # data_list = self.data_list
-        # sheet_names = self.sheet_names
-        # writer = pd.ExcelWriter(self.file.split('.xlsx')[0] + '+++成绩分析统计结果.xlsx')
-
-        if '总表' in self.sheet_names:
-            good_scores_data = self.get_single_double_school_data(self.data_list[0])
-            # good_scores_data.to_excel(writer, sheet_name=f'{sheet_names[0]}++有效分')
-            # writer.close()
-            return good_scores_data
-
-        else:
-            data_physics = [data for data in self.data_list if '物理' in data.columns][0]
-            good_scores_physics = self.get_single_double_school_data(data_physics)
-            data_history = [data for data in self.data_list if '历史' in data.columns][0]
-            good_scores_history = self.get_single_double_school_data(data_history)
-
-            # good_scores_physics.to_excel(writer, sheet_name='physics')
-            # good_scores_history.to_excel(writer, sheet_name='history')
-            # writer.close()
-            return good_scores_physics, good_scores_history
+    def good_scores_school(self, data):
+        """
+        用于学校考试的有效分统计，有效分数是由指定的划线分数计算得到
+        :param data: df
+        :return: 返回一个有效分统计的df
+        """
+        good_scores_data = self.get_single_double_school_data(data)
+        return good_scores_data
 
     def get_single_double_data(self, data, **kwargs):
-        '''
-        按照已知有效分，计算各学科有效分上线数据。主要用于区级及以上考试的成绩数据分析
+        """
+         按照已知有效分，计算各学科有效分上线数据。主要用于区级及以上考试的成绩数据分析
         :param data:
         :param kwargs: 以字典形式输入各学科的有效分数
         :return: 单有效和双有效统计数据
-        '''
-        subjects = [col for col in data.columns if
-                    col in ['总分', '语文', '数学', '英语', '物理', '历史', '化学', '生物', '政治', '地理']]
+        """
+        # subjects = [col for col in data.columns if
+        #             col in ['总分', '语文', '数学', '英语', '物理', '历史', '化学', '生物', '政治', '地理']]
+        subjects = self.get_subjects(data)
         single_data_list = []
         double_data_list = []
         # total = kwargs['总分']
         for subject in subjects:
             single_data = self.get_single_subject_data(data, subject, kwargs[subject])
-            double_data = self.get_double_subject_data(data, subject, kwargs[subject], kwargs['总分'])
+            double_data = self.get_double_subject_data(data, subject, '总分', kwargs[subject], kwargs['总分'])
             single_data_list.append(single_data)
             double_data_list.append(double_data)
         single_data = pd.concat(single_data_list, axis=1)
         double_data = pd.concat(double_data_list, axis=1)
+        unmatched_data = self.get_unmatched_data(double_data, '总分')
         # 单有效统计：增加一列参考人数和一行年级共计
         single_data['参考人数'] = data['班级'].value_counts()
         single_data.loc['年级共计'] = [single_data[col].sum() for col in single_data.columns]
@@ -336,54 +379,85 @@ class GaokaoData2025:
         double_data.loc['年级共计'] = [double_data[col].sum() for col in double_data.columns]
         double_data = self.change_columns_order(double_data)
 
-        return single_data, double_data
+        return single_data, double_data, unmatched_data
 
     def get_single_double_school_data(self, data):
-        '''
-        按照新高考的模式，计算中线和高线的有效分，完成单有效和双有效的统计
+        """
+         按照新高考的模式，计算中线和高线的有效分，完成单有效和双有效的统计
         :param data:
         :return: 返回含有有效分数，单有效和双有效的df
-        '''
-        subjects = [col for col in data.columns if
-                    col in ['总分', '语文', '数学', '英语', '物理', '历史', '化学', '生物', '政治', '地理']]
+
+        """
+
+        # subjects = [col for col in data.columns if
+        #             col in ['语文', '数学', '英语', '物理', '历史', '化学', '政治', '地理', '生物',
+        #                     '化学赋分', '政治赋分', '地理赋分', '生物赋分', '总分', '总分赋分']]
+        subjects = self.get_subjects(data)
         single_data_list = []
         double_data_list = []
-        subjects_name = []
+        # subjects_name = []
         subjects_scores = []
         for subject in subjects:
-            subject_good_score = self.get_subject_good_score(data, subject)
-            subjects_name.append(subject)
+            subject_good_score = self.get_subject_good_score(data, '总分赋分', subject)
+            # subjects_name.append(subject)
             subjects_scores.append(subject_good_score)
 
             single_data = self.get_single_subject_data(data, subject, subject_good_score)
-            double_data = self.get_double_subject_data(data, subject, subject_good_score, GaokaoData2025.mid_line)
+            double_data = self.get_double_subject_data(data, subject, '总分赋分', subject_good_score,
+                                                       GaokaoData2025.total_line)
 
             single_data_list.append(single_data)
             double_data_list.append(double_data)
         # 获取有效分数并转换成df
-        good_scores_dict = dict(zip(subjects_name, subjects_scores))
+        good_scores_dict = dict(zip(subjects, subjects_scores))
         good_scores_df = pd.DataFrame(good_scores_dict, index=[0])
         # 合成单有效和双有效统计的df
+        #
         single_data = pd.concat(single_data_list, axis=1)
         double_data = pd.concat(double_data_list, axis=1)
+
+        # 计算错位人数
+        unmatched_df = self.get_unmatched_data(double_data, '总分赋分')
+
         # 单有效统计：增加一列参考人数和一行年级共计
         single_data['参考人数'] = data['班级'].value_counts()
         single_data.loc['年级共计'] = [single_data[col].sum() for col in single_data.columns]
 
         # 增加一列上线率并用百分号显示
-        single_data['上线率'] = single_data['总分'] / single_data['参考人数']
+        single_data['上线率'] = single_data['总分赋分'] / single_data['参考人数']
         single_data['上线率'] = single_data['上线率'].apply(lambda x: format(x, '.2%'))  # 以百分号显示
 
         # 双有效统计：增加一列参考人数和一行年级共计
         double_data['参考人数'] = data['班级'].value_counts()
         double_data.loc['年级共计'] = [double_data[col].sum() for col in double_data.columns]
 
-        combined_data = pd.concat([good_scores_df, single_data, double_data], keys=['有效分数', '单有效', '双有效'],
+        combined_data = pd.concat([good_scores_df, single_data, double_data, unmatched_df],
+                                  keys=['有效分数', '单有效', '双有效', '错位人数'],
                                   axis=0)
         # 改变列顺序，把参考人数一列放在班级后面
         combined_data = self.change_columns_order(combined_data)
 
         return combined_data
+
+    @staticmethod
+    def get_unmatched_data(data, total_col):
+        """
+        计算错位人数
+        :param total_col: 总分或总分赋分
+        :param data: 双有效数据
+        :return: 返回一个错位人数的df
+
+        """
+        unmatched_list = []
+        for subject in data.columns:
+            unmatched_subject = data[total_col] - data[subject]
+            unmatched_list.append(unmatched_subject)
+
+        unmatched_df_dict = dict(zip(data.columns, unmatched_list))
+        unmatched_df = pd.DataFrame(unmatched_df_dict, index=data.index)
+        unmatched_df.loc['年级共计'] = [unmatched_df[col].sum() for col in unmatched_df.columns]
+        del unmatched_df[total_col]
+        return unmatched_df
 
     @staticmethod
     def get_subject_max_min_score(data, subject):
@@ -401,12 +475,13 @@ class GaokaoData2025:
         C_num = int(subject_num * 0.35)
         D_num = int(subject_num * 0.13)
         data.sort_values(by=subject, ascending=False, inplace=True, ignore_index=True)
-        # 计算A等级的卷面上下限分值及学生人数
+        # 计算A等级的卷面上下限分值及学生人数,由于每个等级的最低分会有不止一个，所以要再次切片
         data_subject_A = data.loc[:A_num - 1, subject]
         A_max = data_subject_A.max()
         A_min = data_subject_A.min()
         max_score.append(A_max)
         min_score.append(A_min)
+        # 再次切片，确保A等级所有最低分都在同一个等级
         final_data_subject_A = data[data[subject] >= A_min]
         # 计算B等级的卷面上下限分值及学生人数
         data_subject_B = data.loc[len(final_data_subject_A):(len(final_data_subject_A) + B_num - 1), subject]
@@ -414,6 +489,7 @@ class GaokaoData2025:
         B_min = data_subject_B.min()
         max_score.append(B_max)
         min_score.append(B_min)
+        # 再次切片，确保B等级所有最低分都在同一个等级
         final_data_subject_B = data[(data[subject] >= B_min) & (data[subject] <= B_max)]
         # 计算C等级的卷面上下限分值及学生人数
         data_subject_C = data.loc[(len(final_data_subject_A) + len(final_data_subject_B)):(
@@ -422,6 +498,7 @@ class GaokaoData2025:
         C_min = data_subject_C.min()
         max_score.append(C_max)
         min_score.append(C_min)
+        # 再次切片，确保C等级所有最低分都在同一个等级
         final_data_subject_C = data[(data[subject] >= C_min) & (data[subject] <= C_max)]
         # 计算D等级的卷面上下限分值及学生人数
         data_subject_D = data.loc[(len(final_data_subject_A) + len(final_data_subject_B) + len(final_data_subject_C)):(
@@ -430,6 +507,7 @@ class GaokaoData2025:
         d_min = data_subject_D.min()
         max_score.append(d_max)
         min_score.append(d_min)
+        # 再次切片，确保D等级所有最低分都在同一个等级
         final_data_subject_D = data[(data[subject] >= d_min) & (data[subject] <= d_max)]
         # 计算E等级的卷面上下限分值及学生人数
         final_data_subject_E = data.loc[
@@ -453,12 +531,28 @@ class GaokaoData2025:
 
     @staticmethod
     def get_single_subject_data(data, subject, subject_score):
+        """
+         计算获取一个学科单有效的df
+        :param data: df
+        :param subject: 学科
+        :param subject_score: 一个学科的有效分数
+        :return: 返回一个单有效的series
+        """
         single_subject = data[data[subject] >= subject_score].groupby(['班级'])[subject].count()
         return single_subject
 
     @staticmethod
-    def get_double_subject_data(data, subject, subject_score, total):
-        double_subject_data = data[data['总分'] >= total]
+    def get_double_subject_data(data, subject, total_col, subject_score, total):
+        """
+         计算获取学科双有校的df
+        :param data: df
+        :param subject: 学科
+        :param total_col: 总分字段名
+        :param subject_score: 学科有效分数
+        :param total: 总分
+        :return: 返回一个学科双有效的series
+        """
+        double_subject_data = data[data[total_col] >= total]
         double_subject = double_subject_data[double_subject_data[subject] >= subject_score].groupby('班级')[
             subject].count()
         return double_subject
@@ -485,6 +579,12 @@ class GaokaoData2025:
 
     @staticmethod
     def get_level(score, min_score):
+        """
+         计算赋分学科的等级
+        :param score: 学科的卷面得分
+        :param min_score: 所在等级的最低分
+        :return: 相应的等级
+        """
         if score >= min_score[0]:
             return 'A'
         elif score >= min_score[1]:
@@ -504,16 +604,16 @@ class GaokaoData2025:
         return new_columns_data
 
     @staticmethod
-    def get_subject_good_score(data, subject):
-        '''
-        计算学科有效分。按照总分上线率，计算学科有效分
+    def get_subject_good_score(data, total_col, subject):
+        """
+         计算学科有效分。按照总分上线率，计算学科有效分
         :param data: DataFrame
         :param subject: 学科
-        :param total: 总分（分为高线和中线）
+        :param total_col: 总分（分为高线和中线）
         :return: 学科的有效分（高线和低线）
-        '''
+        """
         total_num = data.shape[0]
-        good_total_num = data.loc[data['总分'] >= GaokaoData2025.mid_line].shape[0]
+        good_total_num = data.loc[data[total_col] >= GaokaoData2025.total_line].shape[0]
         good_percent_ratio = good_total_num / total_num
         good_subject_ratio = int(data[subject].count() * good_percent_ratio)
         data.sort_values(by=subject, ascending=False, inplace=True, ignore_index=True)
@@ -542,10 +642,32 @@ class GaokaoData2025:
 
         return inner
 
+    @time_use
+    def show_menu(self):
+        print(self.__str__())
+
+        while True:
+            flag = eval(input(f'按键功能选择:\n '
+                              f'    1:年级考试成绩分析；\n '
+                              f'    2:区级以上考试成绩分析；\n'
+                              f'     3:按其它数字键退出程序.\n请选择：'))
+            if flag == 1:
+                GaokaoData2025.total_line = int(input('请输入划线分数(高线或中线): '))
+                self.excel_school_files()
+                print('成绩分析已完成，谢谢使用！')
+                break
+            elif flag == 2:
+                self.excel_files()
+                print('成绩分析已完成，谢谢使用！')
+                break
+
+            else:
+                break
+
 
 if __name__ == '__main__':
-    # file_path = r'D:\data_test\高2026级学生10月考成绩汇总.xlsx'
-    file_path = r'D:\data_test\高2022级零诊成绩测试数据.xlsx'
+    file_path = r'D:\data_test\高2026级学生10月考成绩汇总.xlsx'
+    # file_path = r'D:\data_test\高2022级零诊成绩测试数据.xlsx'
 
     # 不分科的各科有效分
     GaokaoData2025.subjects_good_scores_all = {'语文': 85, '数学': 74, '英语': 68, '物理': 31, '历史': 46, '政治': 41,
@@ -556,13 +678,10 @@ if __name__ == '__main__':
     # 历史类各科有效分
     GaokaoData2025.subjects_good_scores_history = {'语文': 87, '数学': 45, '英语': 62, '历史': 46, '政治': 62,
                                                    '地理': 63, '化学': None, '生物': 52, '总分': 370}
-    GaokaoData2025.high_line = 460
-    GaokaoData2025.mid_line = 370
+    # 划线分数（中线或高线）
+    GaokaoData2025.total_line = 400
 
     newgaokao = GaokaoData2025(file_path)
 
     # newgaokao.excel_files()
     newgaokao.excel_school_files()
-    # newgaokao.get_mixed_data()
-    # newgaokao.get_data_processed()
-
