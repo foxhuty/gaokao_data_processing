@@ -5,27 +5,16 @@
 # @Software: PyCharm
 # @Based on python 3.13
 from gaokao_data_process import GaokaoData2025
+from gaokao_logging import MyException
 import sys
-class MyException(object):
-    def __init__(self, obj_data):
-        self.obj_data = obj_data
-        import traceback
-        import logging
-        logging.basicConfig(
-            level=logging.DEBUG,
-            filename='D:\\my_logging\\error.log',
-            format='%(asctime)s %(levelname)s\n %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
-        )
-        logging.error(traceback.format_exc())
-        logging.info(msg=self.obj_data)
+
 
 def main(file):
     try:
         new_gaokao = GaokaoData2025(file)
-        # new_gaokao.excel_files()
-        new_gaokao.excel_school_files()
+        new_gaokao.show_menu()
         MyException(new_gaokao)
+
 
     except Exception as e:
         print(f"An error occurred: {e}", file=sys.stderr)
@@ -34,7 +23,6 @@ def main(file):
 if __name__ == '__main__':
     file_path = r'D:\data_test\高2026级学生10月考成绩汇总.xlsx'
     # file_path = r'D:\data_test\高2022级零诊成绩测试数据.xlsx'
-    # file_path = r'D:\data_test\高2022级零诊成绩测试数据11.xlsx'
     # file_path = r'D:\data_test\一诊考试成绩分析统计（中线）.xlsx'
 
     # 不分科的各科有效分
@@ -46,11 +34,9 @@ if __name__ == '__main__':
     # 历史类各科有效分
     GaokaoData2025.subjects_good_scores_history = {'语文': 87, '数学': 45, '英语': 62, '历史': 46, '政治': 62,
                                                    '地理': 63, '化学': None, '生物': 52, '总分': 370}
-    # 高线
-    GaokaoData2025.high_line = 460
-    # 中线
-    GaokaoData2025.mid_line = 370
+    #
+
+    # 划线分数（高线或中线）
+    # GaokaoData2025.total_line = 390
 
     main(file_path)
-
-
